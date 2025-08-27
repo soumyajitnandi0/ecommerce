@@ -181,7 +181,6 @@ fun ProductListScreen(
             items(filtered) { product ->
                 ProductCard(
                     product = product,
-                    onAddToCart = { cartViewModel.addToCart(it) },
                     onClick = { onProductClick(product.id) }
                 )
             }

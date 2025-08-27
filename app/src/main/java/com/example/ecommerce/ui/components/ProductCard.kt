@@ -36,7 +36,6 @@ import com.example.ecommerce.data.model.Product
 @Composable
 fun ProductCard(
     product: Product,
-    onAddToCart: (Product) -> Unit,
     onClick: (() -> Unit)? = null
 ) {
     Card(
@@ -100,10 +99,10 @@ fun ProductCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Price and Add to Cart Row
+            // Price Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Price
@@ -114,25 +113,6 @@ fun ProductCard(
                     fontSize = 18.sp,
                     color = Color(0xFF3B82F6)
                 )
-
-                // Add to Cart Button
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(
-                            color = Color(0xFF3B82F6),
-                            shape = CircleShape
-                        )
-                        .clickable { onAddToCart(product) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Add to cart",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
             }
         }
     }
