@@ -1,6 +1,7 @@
 package com.example.ecommerce.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import com.example.ecommerce.viewmodel.CartViewModel
 fun CartScreen(
     cartViewModel: CartViewModel,
     onNavigateToHome: () -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showEmptyCartDialog by remember { mutableStateOf(false) }
@@ -83,7 +85,8 @@ fun CartScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp)
+                        .clickable { onItemClick(cartItem.product.id) },
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {

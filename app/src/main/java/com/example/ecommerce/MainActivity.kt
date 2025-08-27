@@ -37,6 +37,8 @@ import com.example.ecommerce.ui.theme.EcommerceTheme
 import com.example.ecommerce.viewmodel.CartViewModel
 import com.example.ecommerce.viewmodel.ProductViewModel
 import com.example.ecommerce.viewmodel.ProductViewModelFactory
+import com.example.ecommerce.data.local.AppDatabase
+import com.example.ecommerce.viewmodel.CartViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +50,10 @@ class MainActivity : ComponentActivity() {
                 val productViewModel: ProductViewModel = viewModel(
                     factory = ProductViewModelFactory(repository)
                 )
-                val cartViewModel: CartViewModel = viewModel()
+                val db = remember { AppDatabase.getInstance(applicationContext) }
+                val cartViewModel: CartViewModel = viewModel(
+                    factory = CartViewModelFactory(db.cartDao())
+                )
 
                 var showCart by remember { mutableStateOf(false) }
                 var selectedProduct by remember { mutableStateOf<Product?>(null) }
@@ -129,6 +134,10 @@ class MainActivity : ComponentActivity() {
                         showCart -> CartScreen(
                             cartViewModel = cartViewModel,
                             onNavigateToHome = { showCart = false; selectedProduct = null },
+                            onItemClick = { id ->
+                                selectedProduct = productViewModel.productList.firstOrNull { it.id == id }
+                                if (selectedProduct != null) showCart = false
+                            },
                             modifier = Modifier.padding(innerPadding)
                         )
                         else -> ProductListScreen(
