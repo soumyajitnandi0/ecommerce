@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -116,6 +118,8 @@ fun ProductListScreen(
         SortOption.None -> filtered
     }
 
+    val gridState = rememberLazyGridState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -171,7 +175,8 @@ fun ProductListScreen(
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            state = gridState
         ) {
             items(filtered) { product ->
                 ProductCard(
@@ -180,6 +185,21 @@ fun ProductListScreen(
                     onClick = { onProductClick(product.id) }
                 )
             }
+            if (productViewModel.isLoadingMore) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text("Loading more…")
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(gridState.firstVisibleItemIndex, gridState.layoutInfo.totalItemsCount) {
+        val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        val total = gridState.layoutInfo.totalItemsCount
+        if (total > 0 && lastVisible >= total - 4) {
+            productViewModel.loadMore()
         }
     }
 

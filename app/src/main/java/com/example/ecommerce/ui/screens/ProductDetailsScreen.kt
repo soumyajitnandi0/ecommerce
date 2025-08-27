@@ -112,7 +112,7 @@ fun ProductDetailsScreen(
                     }
                     Button(
                         onClick = { repeat(qty) { cartViewModel.addToCart(product) } },
-                        modifier = Modifier.width(150.dp),
+                        modifier = Modifier.width(155.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF4285F4)
                         ),
