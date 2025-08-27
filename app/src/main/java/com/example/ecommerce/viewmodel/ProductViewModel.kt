@@ -16,7 +16,7 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
 
     var isLoading by mutableStateOf(false)
 
-    fun fetchProducts(limit: Int = 10, sort: String? = null) {
+    fun fetchProducts(limit: Int = 20, sort: String? = null) {
         viewModelScope.launch {
             isLoading = true
             try {

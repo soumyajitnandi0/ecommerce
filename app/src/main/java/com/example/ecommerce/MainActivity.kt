@@ -9,15 +9,23 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecommerce.data.model.Product
 import com.example.ecommerce.data.repository.ProductRepository
@@ -53,22 +61,50 @@ class MainActivity : ComponentActivity() {
                                 showCart -> "Cart"
                                 else -> "Products"
                             }) },
-                            navigationIcon = {},
-                            actions = {
-                                IconButton(onClick = {
-                                    if (selectedProduct != null) {
-                                        selectedProduct = null
-                                    } else {
-                                        showCart = !showCart
-                                    }
-                                }) {
-                                    Text(
-                                        when {
-                                            selectedProduct != null -> "Back"
-                                            showCart -> "Products"
-                                            else -> "Cart"
+                            navigationIcon = {
+                                when {
+                                    selectedProduct != null -> {
+                                        IconButton(onClick = { selectedProduct = null }) {
+                                            Icon(
+                                                Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = "Back"
+                                            )
                                         }
-                                    )
+                                    }
+                                    showCart -> {
+                                        IconButton(onClick = { showCart = false }) {
+                                            Icon(
+                                                Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = "Back to Products"
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            actions = {
+                                when {
+                                    showCart && cartViewModel.groupedCartItems.isNotEmpty() -> {
+                                        // Clear All button for cart screen
+                                        TextButton(
+                                            onClick = { cartViewModel.clearAll() }
+                                        ) {
+                                            Text(
+                                                text = "Clear All",
+                                                color = Color.Red,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                    }
+                                    !showCart && selectedProduct == null -> {
+                                        // Cart icon for product list screen
+                                        IconButton(onClick = { showCart = true }) {
+                                            Icon(
+                                                Icons.Filled.ShoppingCart,
+                                                contentDescription = "Cart"
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         )
@@ -79,9 +115,14 @@ class MainActivity : ComponentActivity() {
                             product = selectedProduct!!,
                             cartViewModel = cartViewModel,
                             onBack = { selectedProduct = null },
+                            onNavigateToHome = { showCart = false; selectedProduct = null },
                             modifier = Modifier.padding(innerPadding)
                         )
-                        showCart -> CartScreen(cartViewModel, modifier = Modifier.padding(innerPadding))
+                        showCart -> CartScreen(
+                            cartViewModel = cartViewModel,
+                            onNavigateToHome = { showCart = false; selectedProduct = null },
+                            modifier = Modifier.padding(innerPadding)
+                        )
                         else -> ProductListScreen(
                             productViewModel,
                             cartViewModel,

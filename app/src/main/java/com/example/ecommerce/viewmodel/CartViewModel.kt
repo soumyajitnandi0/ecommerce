@@ -60,6 +60,18 @@ class CartViewModel : ViewModel() {
 
     fun getQuantity(productId: Int): Int = idToQuantity[productId] ?: 0
 
+    fun removeItem(productId: Int) {
+        idToQuantity.remove(productId)
+        idToProduct.remove(productId)
+        recomputeState()
+    }
+
+    fun clearAll() {
+        idToQuantity.clear()
+        idToProduct.clear()
+        recomputeState()
+    }
+
     private fun recomputeState() {
         groupedCartItems = idToQuantity.mapNotNull { (id, qty) ->
             val product = idToProduct[id]
@@ -68,5 +80,3 @@ class CartViewModel : ViewModel() {
         cartItems = groupedCartItems.flatMap { ci -> List(ci.quantity) { ci.product } }
     }
 }
-
-
