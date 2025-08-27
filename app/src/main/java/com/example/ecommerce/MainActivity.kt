@@ -129,6 +129,7 @@ class MainActivity : ComponentActivity() {
                             cartViewModel = cartViewModel,
                             onBack = { selectedProduct = null },
                             onNavigateToHome = { showCart = false; selectedProduct = null },
+                            onNavigateToCart = { showCart = true; selectedProduct = null },
                             modifier = Modifier.padding(innerPadding)
                         )
                         showCart -> CartScreen(

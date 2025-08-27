@@ -59,10 +59,12 @@ fun ProductDetailsScreen(
     cartViewModel: CartViewModel,
     onBack: () -> Unit = {},
     onNavigateToHome: () -> Unit = {},
+    onNavigateToCart: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val (qty, setQty) = remember { mutableStateOf(1) }
-    val totalPrice = product.price * qty
+    val quantity = cartViewModel.getQuantity(product.id)
+    val displayQty = if (quantity > 0) quantity else 1
+    val totalPrice = product.price * displayQty
 
     Scaffold(
         topBar = {
@@ -110,8 +112,11 @@ fun ProductDetailsScreen(
                             color = Color(0xFF4285F4)
                         )
                     }
+                    val inCart = quantity > 0
                     Button(
-                        onClick = { repeat(qty) { cartViewModel.addToCart(product) } },
+                        onClick = {
+                            if (inCart) onNavigateToCart() else cartViewModel.addToCart(product)
+                        },
                         modifier = Modifier.width(165.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF4285F4)
@@ -124,7 +129,7 @@ fun ProductDetailsScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Add to Cart", fontSize = 14.sp)
+                        Text(if (inCart) "Go to Cart" else "Add to Cart", fontSize = 14.sp)
                     }
                 }
             }
@@ -256,15 +261,19 @@ fun ProductDetailsScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape),
-                    color = if (qty > 1) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    color = if (quantity > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                    onClick = { if (qty > 1) setQty(qty - 1) }
+                    onClick = {
+                        if (quantity > 0) {
+                            if (quantity > 1) cartViewModel.decrement(product.id) else cartViewModel.removeItem(product.id)
+                        }
+                    }
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             Icons.Rounded.Remove,
                             contentDescription = "Decrease quantity",
-                            tint = if (qty > 1) MaterialTheme.colorScheme.primary
+                            tint = if (quantity > 0) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             modifier = Modifier.size(20.dp)
                         )
@@ -275,7 +284,7 @@ fun ProductDetailsScreen(
 
                 // Quantity text
                 Text(
-                    "$qty",
+                    "$displayQty",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
@@ -290,7 +299,9 @@ fun ProductDetailsScreen(
                         .size(40.dp)
                         .clip(CircleShape),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    onClick = { setQty(qty + 1) }
+                    onClick = {
+                        if (quantity > 0) cartViewModel.increment(product.id) else cartViewModel.addToCart(product)
+                    }
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
