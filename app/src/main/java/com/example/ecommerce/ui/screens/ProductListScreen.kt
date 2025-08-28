@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -170,24 +172,37 @@ fun ProductListScreen(
             )
         }
 
-        // Product Grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            state = gridState
-        ) {
-            items(filtered) { product ->
-                ProductCard(
-                    product = product,
-                    onClick = { onProductClick(product.id) }
+        // Product Grid or Empty State
+        if (filtered.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = com.example.ecommerce.R.drawable.img),
+                    contentDescription = "No products",
+                    modifier = Modifier.size(300.dp)
                 )
             }
-            if (productViewModel.isLoadingMore) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        Text("Loading more…")
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                state = gridState
+            ) {
+                items(filtered) { product ->
+                    ProductCard(
+                        product = product,
+                        onClick = { onProductClick(product.id) }
+                    )
+                }
+                if (productViewModel.isLoadingMore) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                            Text("Loading more…")
+                        }
                     }
                 }
             }
@@ -210,121 +225,129 @@ fun ProductListScreen(
             Card(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 50.dp), // bottom margin here
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
-                ) {
-                    // Header
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp, vertical = 20.dp),
+                        verticalArrangement = Arrangement.Top,
+                        contentPadding = PaddingValues(bottom = 88.dp)
                     ) {
-                        Text(
-                            text = "Filters",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1F2937)
-                        )
-
-                        Row {
-                            TextButton(
-                                onClick = {
-                                    selectedCategories = emptySet()
-                                    minRating = 0
-                                    selectedPriceRange = null
-                                    sortOption = SortOption.None
-                                }
+                        item {
+                            // Header
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    "Reset",
-                                    color = Color(0xFF3B82F6)
+                                    text = "Filters",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1F2937)
                                 )
-                            }
 
-                            IconButton(
-                                onClick = { showFilters = false }
-                            ) {
-                                Icon(
-                                    Icons.Rounded.Close,
-                                    contentDescription = "Close",
-                                    tint = Color(0xFF6B7280)
-                                )
-                            }
-                        }
-                    }
+                                Row {
+                                    TextButton(
+                                        onClick = {
+                                            selectedCategories = emptySet()
+                                            minRating = 0
+                                            selectedPriceRange = null
+                                            sortOption = SortOption.None
+                                        }
+                                    ) {
+                                        Text(
+                                            "Reset",
+                                            color = Color(0xFF3B82F6)
+                                        )
+                                    }
 
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        // Category Section
-                        FilterSection(title = "Category") {
-                            CategoryChips(
-                                categories = categories,
-                                selectedCategories = selectedCategories,
-                                onCategoryToggle = { cat ->
-                                    selectedCategories = if (selectedCategories.contains(cat)) {
-                                        selectedCategories - cat
-                                    } else {
-                                        selectedCategories + cat
+                                    IconButton(
+                                        onClick = { showFilters = false }
+                                    ) {
+                                        Icon(
+                                            Icons.Rounded.Close,
+                                            contentDescription = "Close",
+                                            tint = Color(0xFF6B7280)
+                                        )
                                     }
                                 }
-                            )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        item { Spacer(modifier = Modifier.height(20.dp)) }
 
-                        // Price Range Section
-                        FilterSection(title = "Price Range") {
-                            PriceRangeChips(
-                                selectedPriceRange = selectedPriceRange,
-                                onPriceRangeSelect = { range ->
-                                    selectedPriceRange = if (selectedPriceRange == range) null else range
-                                }
-                            )
+                        item {
+                            // Category Section
+                            FilterSection(title = "Category") {
+                                CategoryChips(
+                                    categories = categories,
+                                    selectedCategories = selectedCategories,
+                                    onCategoryToggle = { cat ->
+                                        selectedCategories = if (selectedCategories.contains(cat)) {
+                                            selectedCategories - cat
+                                        } else {
+                                            selectedCategories + cat
+                                        }
+                                    }
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                        // Minimum Rating Section
-                        FilterSection(title = "Minimum Rating") {
-                            RatingChips(
-                                minRating = minRating,
-                                onRatingSelect = { rating ->
-                                    minRating = if (minRating == rating) 0 else rating
-                                }
-                            )
+                        item {
+                            // Price Range Section
+                            FilterSection(title = "Price Range") {
+                                PriceRangeChips(
+                                    selectedPriceRange = selectedPriceRange,
+                                    onPriceRangeSelect = { range ->
+                                        selectedPriceRange = if (selectedPriceRange == range) null else range
+                                    }
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                        // Sort By Section
-                        FilterSection(title = "Sort By") {
-                            SortChips(
-                                sortOption = sortOption,
-                                onSortSelect = { option ->
-                                    sortOption = if (sortOption == option) SortOption.None else option
-                                }
-                            )
+                        item {
+                            // Minimum Rating Section
+                            FilterSection(title = "Minimum Rating") {
+                                RatingChips(
+                                    minRating = minRating,
+                                    onRatingSelect = { rating ->
+                                        minRating = if (minRating == rating) 0 else rating
+                                    }
+                                )
+                            }
+                        }
+
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                        item {
+                            // Sort By Section
+                            FilterSection(title = "Sort By") {
+                                SortChips(
+                                    sortOption = sortOption,
+                                    onSortSelect = { option ->
+                                        sortOption = if (sortOption == option) SortOption.None else option
+                                    }
+                                )
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // Apply Button
+                    // Apply Button pinned at bottom
                     Button(
                         onClick = { showFilters = false },
                         modifier = Modifier
+                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
+                            .padding(20.dp)
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3B82F6)

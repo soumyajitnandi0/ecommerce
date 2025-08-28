@@ -1,6 +1,7 @@
 package com.example.ecommerce.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,7 +75,16 @@ fun CartScreen(
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        LazyColumn(
+        if (cartViewModel.groupedCartItems.isEmpty()) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Image(
+                    painter = painterResource(id = com.example.ecommerce.R.drawable.img_1),
+                    contentDescription = "Empty cart",
+                    modifier = Modifier.size(220.dp)
+                )
+            }
+        } else {
+            LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -200,6 +211,7 @@ fun CartScreen(
                     }
                 }
             }
+        }
         }
 
         // Bottom Summary
