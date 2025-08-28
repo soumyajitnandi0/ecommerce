@@ -26,12 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.ecommerce.data.model.Product
+import com.example.ecommerce.R
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun ProductCard(
@@ -59,14 +64,30 @@ fun ProductCard(
                     .background(Color(0xFFF8F9FA)),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = product.image,
+                val context = LocalContext.current
+                coil.compose.SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(product.image)
+                        .crossfade(true)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .build(),
                     contentDescription = product.title,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(140.dp)
                         .padding(8.dp),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Fit,
+                    loading = {
+                        ShimmerPlaceholder()
+                    },
+                    error = {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = R.drawable.img),
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
                 )
             }
 

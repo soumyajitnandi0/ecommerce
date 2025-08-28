@@ -48,9 +48,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.ecommerce.data.model.Product
 import com.example.ecommerce.viewmodel.CartViewModel
 import com.example.ecommerce.ui.components.RatingBar
+import androidx.compose.ui.platform.LocalContext
+import com.example.ecommerce.R
+import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -153,13 +158,29 @@ fun ProductDetailsScreen(
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                AsyncImage(
-                    model = product.image,
+                val context = LocalContext.current
+                coil.compose.SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(product.image)
+                        .crossfade(true)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .build(),
                     contentDescription = product.title,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Fit,
+                    loading = {
+                        com.example.ecommerce.ui.components.ShimmerPlaceholder()
+                    },
+                    error = {
+                        androidx.compose.foundation.Image(
+                            painter = painterResource(id = R.drawable.img),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 )
             }
 

@@ -173,7 +173,12 @@ fun ProductListScreen(
         }
 
         // Product Grid or Empty State
-        if (filtered.isEmpty()) {
+        val hasActiveFilters = debouncedQuery.isNotBlank() ||
+                selectedCategories.isNotEmpty() ||
+                selectedPriceRange != null ||
+                minRating > 0
+
+        if (filtered.isEmpty() && hasActiveFilters) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -183,6 +188,13 @@ fun ProductListScreen(
                     contentDescription = "No products",
                     modifier = Modifier.size(300.dp)
                 )
+            }
+        } else if (products.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator()
             }
         } else {
             LazyVerticalGrid(
