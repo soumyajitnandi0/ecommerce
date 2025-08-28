@@ -68,7 +68,9 @@ fun ProductDetailsScreen(
     modifier: Modifier = Modifier
 ) {
     val quantity = cartViewModel.getQuantity(product.id)
-    val displayQty = if (quantity > 0) quantity else 1
+    val tempQtyState = remember { mutableStateOf(1) }
+    // Show cart quantity when in cart; otherwise show local desired quantity
+    val displayQty = if (quantity > 0) quantity else tempQtyState.value
     val totalPrice = product.price * displayQty
 
     Scaffold(
@@ -120,7 +122,7 @@ fun ProductDetailsScreen(
                     val inCart = quantity > 0
                     Button(
                         onClick = {
-                            if (inCart) onNavigateToCart() else cartViewModel.addToCart(product)
+                            if (inCart) onNavigateToCart() else cartViewModel.addToCart(product, tempQtyState.value)
                         },
                         modifier = Modifier.width(165.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -134,7 +136,10 @@ fun ProductDetailsScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text(if (inCart) "Go to Cart" else "Add to Cart", fontSize = 14.sp)
+                        Text(
+                            if (inCart) "Go to Cart" else "Add to Cart",
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }
@@ -287,6 +292,8 @@ fun ProductDetailsScreen(
                     onClick = {
                         if (quantity > 0) {
                             if (quantity > 1) cartViewModel.decrement(product.id) else cartViewModel.removeItem(product.id)
+                        } else {
+                            if (tempQtyState.value > 1) tempQtyState.value = tempQtyState.value - 1
                         }
                     }
                 ) {
@@ -321,7 +328,7 @@ fun ProductDetailsScreen(
                         .clip(CircleShape),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     onClick = {
-                        if (quantity > 0) cartViewModel.increment(product.id) else cartViewModel.addToCart(product)
+                        if (quantity > 0) cartViewModel.increment(product.id) else tempQtyState.value = tempQtyState.value + 1
                     }
                 ) {
                     Box(contentAlignment = Alignment.Center) {

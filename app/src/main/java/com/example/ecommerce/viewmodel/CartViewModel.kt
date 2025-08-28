@@ -100,8 +100,7 @@ class CartViewModel(private val cartDao: CartDao? = null) : ViewModel() {
                         quantity = ci.quantity
                     )
                 }
-                dao.clear()
-                dao.upsertAll(entities)
+                dao.replaceAll(entities)
             }
         }
     }

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,6 +25,12 @@ interface CartDao {
 
     @Query("DELETE FROM cart_items")
     suspend fun clear()
+
+    @Transaction
+    suspend fun replaceAll(items: List<CartItemEntity>) {
+        clear()
+        upsertAll(items)
+    }
 }
 
 
